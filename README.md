@@ -24,6 +24,7 @@ A Node.js + TypeScript bot to manage DLLM position of Meteora on the Solana bloc
 - typescript
 - ts-node
 
+# Test note script works
 ---
 
 **Note:** This is a starter template. Add your logic in `src/index.ts`.
