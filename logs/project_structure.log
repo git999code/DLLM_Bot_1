@@ -1,6 +1,6 @@
 ﻿Project Root Path: C:\Users\T999\CascadeProjects\DLLM_Bot_1
 Windows Username: T999
-Generated: 05/21/2025 21:51:50
+Generated: 05/21/2025 21:53:45
 ----------------------------------------
 
   .env
@@ -11,6 +11,7 @@ Generated: 05/21/2025 21:51:50
   airdrop_wallet.js
   check_balance.js
   [data]
+    parameters.json
   [dist]
     [dlmm]
       dlmm.js

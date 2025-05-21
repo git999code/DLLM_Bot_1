@@ -1,0 +1,6 @@
+{
+  "global": {
+    "timeout": 20,
+    "retries": 3
+  }
+}

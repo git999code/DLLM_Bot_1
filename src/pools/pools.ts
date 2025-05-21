@@ -181,11 +181,13 @@ export function printPoolInfo(pools: PoolDetails[]): void {
   });
 
   // Adjust border widths to account for double separators (|| takes 2 characters)
-  // Each || adds 1 extra character to the separator length (2 characters for || vs 1 for |)
-  const separatorWidths = colWidths.map(w => w);
-  // Add 1 extra character for each double separator (2 double separators: before Fees 30m and Fees 1h)
-  separatorWidths[2] += 1; // Before Fees 30m
-  separatorWidths[4] += 1; // Before Fees 1h
+  const separatorWidths = colWidths.map((w, i) => {
+    if (i === 2 || i === 4) {
+      // Add 1 to account for the extra character in || (2 characters instead of 1 for |)
+      return w + 1;
+    }
+    return w;
+  });
 
   // Print the header row with double vertical lines before Fees 30m (index 3) and Fees 1h (index 5)
   const headerRowParts = headers.map((header, i) => header.padEnd(colWidths[i]));
