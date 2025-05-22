@@ -1,6 +1,6 @@
 ﻿Project Root Path: C:\Users\T999\CascadeProjects\DLLM_Bot_1
 Windows Username: T999
-Generated: 05/22/2025 21:48:07
+Generated: 05/22/2025 21:59:09
 ----------------------------------------
 
   .env
@@ -8541,6 +8541,7 @@ Generated: 05/22/2025 21:48:07
       pools.ts
     [positions]
       positions.ts
+    [types]
     [utils]
       [display]
         menu.ts
@@ -8550,5 +8551,4 @@ Generated: 05/22/2025 21:48:07
     [wallet]
       wallet.ts
   tsconfig.json
-  [types]
   wallet-keypair.json

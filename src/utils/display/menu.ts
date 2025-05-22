@@ -2,12 +2,12 @@
 // Parameters: options array for main menu, none for parameters menu
 // Returns: Selected option key for main menu, void for parameters menu
 import inquirer from 'inquirer';
-import { Parameters, ParametersSchema } from '../config/database-schema';
+import { Parameters, ParametersSchema } from '../../config/database-schema'; // Fixed path
 import { readParameters, writeParameters } from '../parameters';
 
 async function promptInput<T>(
   message: string,
-  current: T, 
+  current: T,
   validate?: (input: string) => string | true,
 ): Promise<string> {
   const { value } = await inquirer.prompt([
@@ -129,7 +129,7 @@ export async function showParametersMenu(): Promise<void> {
 
         if (subChoice === 'address') {
           const value = await promptInput(
-            'Enter Solana Wallet Address (e.g., 7C4jsPz...)',
+            'Enter Solana Wallet Address (e.g., 7C4js...)',
             params.defaultWalletAddress.solanaWalletAddress,
             (input) => {
               if (!input) return true;

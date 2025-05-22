@@ -3,9 +3,9 @@
 // Returns: Parameters object for read/init, void for write
 import fs from 'fs/promises';
 import path from 'path';
-import { ParametersSchema, Parameters } from '../config/database-schema';
+import { ParametersSchema, Parameters } from '../config/database-schema'; // Fixed path
 
-const PARAMETERS_PATH = path.join(__dirname, '../data/parameters.json');
+const PARAMETERS_PATH = path.join(__dirname, '../../data/parameters.json');
 
 export async function readParameters(): Promise<Parameters> {
   try {
@@ -13,7 +13,7 @@ export async function readParameters(): Promise<Parameters> {
     const parsed = JSON.parse(data);
     return ParametersSchema.parse(parsed);
   } catch (error) {
-    console.error('Failed to read parameters, using defaults:', error.message);
+    console.error('Failed to read parameters, using defaults:', error instanceof Error ? error.message : 'Unknown error');
     return initParameters();
   }
 }
@@ -23,7 +23,7 @@ export async function writeParameters(params: Parameters): Promise<void> {
     const validated = ParametersSchema.parse(params);
     await fs.writeFile(PARAMETERS_PATH, JSON.stringify(validated, null, 2), 'utf-8');
   } catch (error) {
-    console.error('Failed to save parameters, please try again:', error.message);
+    console.error('Failed to save parameters, please try again:', error instanceof Error ? error.message : 'Unknown error');
     throw error;
   }
 }
