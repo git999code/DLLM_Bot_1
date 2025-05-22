@@ -1,6 +1,6 @@
 ﻿Project Root Path: C:\Users\T999\CascadeProjects\DLLM_Bot_1
 Windows Username: T999
-Generated: 05/22/2025 21:38:07
+Generated: 05/22/2025 21:48:07
 ----------------------------------------
 
   .env
@@ -10,8 +10,6 @@ Generated: 05/22/2025 21:38:07
     task.json
   airdrop_wallet.js
   check_balance.js
-  [config]
-    database-schema.ts
   [data]
     parameters.json
   [dist]
@@ -155,12 +153,6 @@ Generated: 05/22/2025 21:38:07
         wasi.d.ts
         worker_threads.d.ts
         zlib.d.ts
-      [node-fetch]
-        externals.d.ts
-        index.d.ts
-        LICENSE
-        package.json
-        README.md
       [through]
         index.d.ts
         LICENSE
@@ -184,52 +176,6 @@ Generated: 05/22/2025 21:38:07
       license
       package.json
       readme.md
-    [asynckit]
-      bench.js
-      index.js
-      [lib]
-        abort.js
-        async.js
-        defer.js
-        iterate.js
-        readable_asynckit.js
-        readable_parallel.js
-        readable_serial.js
-        readable_serial_ordered.js
-        state.js
-        streamify.js
-        terminator.js
-      LICENSE
-      package.json
-      parallel.js
-      README.md
-      serial.js
-      serialOrdered.js
-      stream.js
-    [call-bind-apply-helpers]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      .nycrc
-      actualApply.d.ts
-      actualApply.js
-      applyBind.d.ts
-      applyBind.js
-      CHANGELOG.md
-      functionApply.d.ts
-      functionApply.js
-      functionCall.d.ts
-      functionCall.js
-      index.d.ts
-      index.js
-      LICENSE
-      package.json
-      README.md
-      reflectApply.d.ts
-      reflectApply.js
-      [test]
-        index.js
-      tsconfig.json
     [chardet]
       .travis.yml
       [encoding]
@@ -274,39 +220,6 @@ Generated: 05/22/2025 21:38:07
       LICENSE
       package.json
       README.md
-    [combined-stream]
-      [lib]
-        combined_stream.js
-      License
-      package.json
-      Readme.md
-      yarn.lock
-    [delayed-stream]
-      .npmignore
-      [lib]
-        delayed_stream.js
-      License
-      Makefile
-      package.json
-      Readme.md
-    [dunder-proto]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      .nycrc
-      CHANGELOG.md
-      get.d.ts
-      get.js
-      LICENSE
-      package.json
-      README.md
-      set.d.ts
-      set.js
-      [test]
-        get.js
-        index.js
-        set.js
-      tsconfig.json
     [emoji-regex]
       [es2015]
         index.js
@@ -322,76 +235,6 @@ Generated: 05/22/2025 21:38:07
       license
       package.json
       readme.md
-    [es-define-property]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      .nycrc
-      CHANGELOG.md
-      index.d.ts
-      index.js
-      LICENSE
-      package.json
-      README.md
-      [test]
-        index.js
-      tsconfig.json
-    [es-errors]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      CHANGELOG.md
-      eval.d.ts
-      eval.js
-      index.d.ts
-      index.js
-      LICENSE
-      package.json
-      range.d.ts
-      range.js
-      README.md
-      ref.d.ts
-      ref.js
-      syntax.d.ts
-      syntax.js
-      [test]
-        index.js
-      tsconfig.json
-      type.d.ts
-      type.js
-      uri.d.ts
-      uri.js
-    [es-object-atoms]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      CHANGELOG.md
-      index.d.ts
-      index.js
-      isObject.d.ts
-      isObject.js
-      LICENSE
-      package.json
-      README.md
-      RequireObjectCoercible.d.ts
-      RequireObjectCoercible.js
-      [test]
-        index.js
-      ToObject.d.ts
-      ToObject.js
-      tsconfig.json
-    [es-set-tostringtag]
-      .eslintrc
-      .nycrc
-      CHANGELOG.md
-      index.d.ts
-      index.js
-      LICENSE
-      package.json
-      README.md
-      [test]
-        index.js
-      tsconfig.json
     [external-editor]
       example_async.js
       example_sync.js
@@ -416,133 +259,12 @@ Generated: 05/22/2025 21:38:07
       license
       package.json
       readme.md
-    [form-data]
-      index.d.ts
-      [lib]
-        browser.js
-        form_data.js
-        populate.js
-      License
-      package.json
-      Readme.md
-    [function-bind]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-        SECURITY.md
-      .nycrc
-      CHANGELOG.md
-      implementation.js
-      index.js
-      LICENSE
-      package.json
-      README.md
-      [test]
-        .eslintrc
-        index.js
-    [get-intrinsic]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      .nycrc
-      CHANGELOG.md
-      index.js
-      LICENSE
-      package.json
-      README.md
-      [test]
-        GetIntrinsic.js
-    [get-proto]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      .nycrc
-      CHANGELOG.md
-      index.d.ts
-      index.js
-      LICENSE
-      Object.getPrototypeOf.d.ts
-      Object.getPrototypeOf.js
-      package.json
-      README.md
-      Reflect.getPrototypeOf.d.ts
-      Reflect.getPrototypeOf.js
-      [test]
-        index.js
-      tsconfig.json
-    [gopd]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      CHANGELOG.md
-      gOPD.d.ts
-      gOPD.js
-      index.d.ts
-      index.js
-      LICENSE
-      package.json
-      README.md
-      [test]
-        index.js
-      tsconfig.json
     [has-flag]
       index.d.ts
       index.js
       license
       package.json
       readme.md
-    [hasown]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      .nycrc
-      CHANGELOG.md
-      index.d.ts
-      index.js
-      LICENSE
-      package.json
-      README.md
-      tsconfig.json
-    [has-symbols]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      .nycrc
-      CHANGELOG.md
-      index.d.ts
-      index.js
-      LICENSE
-      package.json
-      README.md
-      shams.d.ts
-      shams.js
-      [test]
-        index.js
-        [shams]
-          core-js.js
-          get-own-property-symbols.js
-        tests.js
-      tsconfig.json
-    [has-tostringtag]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      .nycrc
-      CHANGELOG.md
-      index.d.ts
-      index.js
-      LICENSE
-      package.json
-      README.md
-      shams.d.ts
-      shams.js
-      [test]
-        index.js
-        [shams]
-          core-js.js
-          get-own-property-symbols.js
-        tests.js
-      tsconfig.json
     [iconv-lite]
       Changelog.md
       [encodings]
@@ -5397,61 +5119,6 @@ Generated: 05/22/2025 21:38:07
       zipObject.js
       zipObjectDeep.js
       zipWith.js
-    [math-intrinsics]
-      .eslintrc
-      [.github]
-        FUNDING.yml
-      abs.d.ts
-      abs.js
-      CHANGELOG.md
-      [constants]
-        maxArrayLength.d.ts
-        maxArrayLength.js
-        maxSafeInteger.d.ts
-        maxSafeInteger.js
-        maxValue.d.ts
-        maxValue.js
-      floor.d.ts
-      floor.js
-      isFinite.d.ts
-      isFinite.js
-      isInteger.d.ts
-      isInteger.js
-      isNaN.d.ts
-      isNaN.js
-      isNegativeZero.d.ts
-      isNegativeZero.js
-      LICENSE
-      max.d.ts
-      max.js
-      min.d.ts
-      min.js
-      mod.d.ts
-      mod.js
-      package.json
-      pow.d.ts
-      pow.js
-      README.md
-      round.d.ts
-      round.js
-      sign.d.ts
-      sign.js
-      [test]
-        index.js
-      tsconfig.json
-    [mime-db]
-      db.json
-      HISTORY.md
-      index.js
-      LICENSE
-      package.json
-      README.md
-    [mime-types]
-      HISTORY.md
-      index.js
-      LICENSE
-      package.json
-      README.md
     [mimic-fn]
       index.d.ts
       index.js
@@ -5461,15 +5128,6 @@ Generated: 05/22/2025 21:38:07
     [mute-stream]
       LICENSE
       mute.js
-      package.json
-      README.md
-    [node-fetch]
-      browser.js
-      [lib]
-        index.es.js
-        index.js
-        index.mjs
-      LICENSE.md
       package.json
       README.md
     [onetime]
@@ -7910,13 +7568,6 @@ Generated: 05/22/2025 21:38:07
       LICENSE
       package.json
       README.md
-    [tr46]
-      .npmignore
-      index.js
-      [lib]
-        .gitkeep
-        mappingTable.json
-      package.json
     [tslib]
       CopyrightNotice.txt
       LICENSE.txt
@@ -8024,22 +7675,6 @@ Generated: 05/22/2025 21:38:07
       util.d.ts
       webidl.d.ts
       websocket.d.ts
-    [webidl-conversions]
-      [lib]
-        index.js
-      LICENSE.md
-      package.json
-      README.md
-    [whatwg-url]
-      [lib]
-        public-api.js
-        URL.js
-        URL-impl.js
-        url-state-machine.js
-        utils.js
-      LICENSE.txt
-      package.json
-      README.md
     [zod]
       [dist]
         [cjs]
@@ -8895,6 +8530,8 @@ Generated: 05/22/2025 21:38:07
   package-lock.json
   README.md
   [src]
+    [config]
+      database-schema.ts
     [data-acquisition]
     [data-operations]
     index.ts
