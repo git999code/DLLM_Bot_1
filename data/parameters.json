@@ -1,6 +1,10 @@
 {
-  "global": {
-    "timeout": 20,
-    "retries": 3
+  "defaultCodeSettings": {
+    "timeoutSeconds": 20,
+    "numberOfAttempts": 3
+  },
+  "defaultWalletAddress": {
+    "solanaWalletAddress": "",
+    "walletName": ""
   }
 }
