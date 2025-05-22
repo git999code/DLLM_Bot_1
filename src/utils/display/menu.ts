@@ -7,7 +7,7 @@ import { readParameters, writeParameters } from '../parameters';
 
 async function promptInput<T>(
   message: string,
-  current: T,
+  current: T, 
   validate?: (input: string) => string | true,
 ): Promise<string> {
   const { value } = await inquirer.prompt([
