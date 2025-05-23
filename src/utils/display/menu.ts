@@ -10,20 +10,14 @@
 // Deep Repo Analysis: Check data/parameters.json, data/secrets.json.enc, src/config/database-schema.ts, src/utils/secrets.ts.
 
 import inquirer from 'inquirer';
-import { createInterface } from 'readline';
 import { Parameters, ParametersSchema } from '../../config/database-schema';
 import { getEncryptionKey, retrieveSecret, storeSecret } from '../secrets';
 import { readParameters, writeParameters } from '../parameters';
 
 async function clearScreen(): Promise<void> {
-  // Clears terminal screen before each menu prompt to reduce clutter.
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  await new Promise<void>((resolve) => {
-    process.stdout.write('\x1Bc', () => {
-      rl.close();
-      resolve();
-    });
-  });
+  // Clears terminal screen before each menu prompt to reduce clutter using ANSI escape sequence.
+  // Avoids readline to prevent input interference with inquirer on Windows.
+  process.stdout.write('\x1B[2J\x1B[H');
 }
 
 async function promptInput<T>(
