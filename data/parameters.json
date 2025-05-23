@@ -1,7 +1,7 @@
 {
   "defaultCodeSettings": {
     "timeoutSeconds": 20,
-    "numberOfAttempts": 2
+    "numberOfAttempts": 3
   },
   "defaultWalletAddress": {
     "solanaWalletAddress": "68jHEeUr1MMTkndgN4uE9FVn8qyJi37bZ15VVstTCdXx",

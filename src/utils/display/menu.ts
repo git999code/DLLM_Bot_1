@@ -1,6 +1,14 @@
-// Purpose: Provides agnostic menu navigation using inquirer
-// Parameters: options array for main menu, none for parameters menu
-// Returns: Selected option key for main menu, void for parameters menu
+// Purpose: Provides agnostic menu navigation using inquirer for parameter management.
+// Overview: Implements a hierarchical menu for editing parameters stored in data/parameters.json.
+// - Main Menu: Displays top-level options (0: Set Parameters, Exit). Exit terminates the program.
+// - Parameter Menu: Lists parameter categories (e.g., Default Code Settings, Default Wallet Address). Cancel returns to Main Menu.
+// - Sub-Menus: Allow editing specific parameters (e.g., timeoutSeconds, walletName). Cancel restores original sub-menu values; Save and Back persists changes to file.
+// Future Development: When adding new parameters, maintain this behavior:
+// - Add new categories to showParametersMenu choices.
+// - Create new sub-menus with Cancel (restores sub-menu values) and Save and Back (saves to file).
+// - Reload original sub-menu values on Cancel using a copy of the relevant params subset.
+// Deep Repo Analysis: Check data/parameters.json schema, src/config/database-schema.ts for validation, and src/utils/parameters.ts for file I/O.
+
 import inquirer from 'inquirer';
 import { Parameters, ParametersSchema } from '../../config/database-schema';
 import { readParameters, writeParameters } from '../parameters';
@@ -10,6 +18,7 @@ async function promptInput<T>(
   current: T,
   validate?: (input: string) => string | true,
 ): Promise<string> {
+  // Prompts user for input, pre-filling current value, with optional validation.
   const { value } = await inquirer.prompt([
     {
       type: 'input',
@@ -22,6 +31,8 @@ async function promptInput<T>(
 }
 
 export async function showMainMenu(options: string[]): Promise<string> {
+  // Displays main menu with provided options (e.g., Set Parameters) plus Exit.
+  // Returns selected option key (e.g., '0' for Set Parameters, 'exit' to terminate).
   const choices = options.map((opt, i) => ({
     name: `${i}: ${opt}`,
     value: i.toString(),
@@ -40,6 +51,9 @@ export async function showMainMenu(options: string[]): Promise<string> {
 }
 
 export async function showParametersMenu(): Promise<void> {
+  // Displays parameter menu for selecting categories (e.g., Code Settings, Wallet Address).
+  // Cancel returns to main menu without saving.
+  // Sub-menus handle parameter editing; Save and Back writes to data/parameters.json.
   let params = await readParameters();
 
   while (true) {
@@ -59,7 +73,8 @@ export async function showParametersMenu(): Promise<void> {
     if (choice === 'cancel') break;
 
     if (choice === 'code') {
-      const originalCodeSettings = { ...params.defaultCodeSettings }; // Store original
+      // Sub-menu for editing timeoutSeconds and numberOfAttempts.
+      const originalCodeSettings = { ...params.defaultCodeSettings }; // Store original for Cancel
       while (true) {
         const { subChoice } = await inquirer.prompt([
           {
@@ -108,7 +123,8 @@ export async function showParametersMenu(): Promise<void> {
         }
       }
     } else if (choice === 'wallet') {
-      const originalWalletAddress = { ...params.defaultWalletAddress }; // Store original
+      // Sub-menu for editing solanaWalletAddress and walletName.
+      const originalWalletAddress = { ...params.defaultWalletAddress }; // Store original for Cancel
       while (true) {
         const { subChoice } = await inquirer.prompt([
           {
