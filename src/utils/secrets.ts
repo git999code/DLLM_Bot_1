@@ -5,10 +5,11 @@
 // - storeSecret: Encrypts and stores a secret in secrets.json.enc.
 // - retrieveSecret: Retrieves and decrypts a secret.
 // - getEncryptionKey: Prompts for key twice (initial and confirmation) if empty, stores in memory, saves to data/encryption_key.json (not in GitHub).
+// Key Management: Encryption key is stored in plain text in data/encryption_key.json (.gitignore). Prompted twice on first use (plain text, ≥8 characters). Back up key securely; loss prevents secret decryption. Delete data/encryption_key.json to re-prompt.
 // Future Development: Add new secrets by calling storeSecret/retrieveSecret with unique keys.
 // - Update src/config/database-schema.ts to flag new secret parameters.
 // - Ensure data/secrets.json.enc and data/encryption_key.json are in .gitignore.
-// Deep Repo Analysis: Check data/secrets.json.enc for encrypted secrets, data/parameters.json for non-secrets, src/utils/parameters.ts for I/O.
+// Deep Repo Analysis: Check data/secrets.json.enc for encrypted secrets, data/parameters.json for non-secrets, src/utils/parameters.ts for I/O, data/encryption_key.json for key storage.
 
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 import fs from 'fs/promises';

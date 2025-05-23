@@ -4,6 +4,7 @@
 // - Parameter Menu: Lists categories (e.g., Code Settings, Wallet Address). Cancel returns to Main Menu.
 // - Sub-Menus: Edit parameters. Non-secrets show current value; secrets show ******. Cancel restores sub-menu values; Save and Back persists changes.
 // - Secrets: Displayed as "[description] (secret)" (e.g., "Solana Wallet Address (secret)") with ******, never plain text.
+// Windows TTY Issues: inquirer prompts may hang on Windows due to screen clearing or input conflicts. Use ANSI escape codes (\x1B[2J\x1B[H) only in menu prompts, avoid in promptInput.
 // Future Development: Add new parameter categories to showParametersMenu, new sub-menus for parameters.
 // - For secrets, use retrieveSecret/storeSecret from src/utils/secrets.ts, display as [description] (secret) with ******.
 // - Update subChoice choices with new parameters, maintain Cancel/Save and Back behavior.
