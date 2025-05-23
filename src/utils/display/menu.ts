@@ -16,7 +16,6 @@ import { readParameters, writeParameters } from '../parameters';
 
 async function clearScreen(): Promise<void> {
   // Clears terminal screen before each menu prompt to reduce clutter using ANSI escape sequence.
-  // Avoids readline to prevent input interference with inquirer on Windows.
   process.stdout.write('\x1B[2J\x1B[H');
 }
 
@@ -25,16 +24,18 @@ async function promptInput<T>(
   current: T,
   validate?: (input: string) => string | true,
   isSecret: boolean = false,
-): Promise<string> {
-  await clearScreen();
+): Promise<string | null> {
+  const displayValue = isSecret ? '******' : current;
   const { value } = await inquirer.prompt([
     {
-      type: isSecret ? 'password' : 'input',
+      type: 'input',
       name: 'value',
-      message: `${message} ${isSecret ? '' : `[${current}]`}`,
+      message: `${message} [${displayValue}]`,
       validate,
+      prefix: '', // Remove ? prefix
     },
   ]);
+  if (value === '') return null; // Cancel input
   return value || String(current);
 }
 
@@ -50,8 +51,9 @@ export async function showMainMenu(options: string[]): Promise<string> {
     {
       type: 'list',
       name: 'choice',
-      message: 'Welcome to DLLM_Bot_1\nUse ↑/↓ to navigate, Enter to select',
+      message: 'Welcome to DLLM_Bot_1',
       choices,
+      prefix: '',
     },
   ]);
   return choice;
@@ -67,12 +69,13 @@ export async function showParametersMenu(): Promise<void> {
       {
         type: 'list',
         name: 'choice',
-        message: 'Parameters Menu:\nUse ↑/↓ to navigate, Enter to select',
+        message: 'Parameters Menu',
         choices: [
           { name: '1: Default Code Settings', value: 'code' },
           { name: '2: Default Wallet Address', value: 'wallet' },
           { name: 'Cancel', value: 'cancel' },
         ],
+        prefix: '',
       },
     ]);
 
@@ -86,13 +89,14 @@ export async function showParametersMenu(): Promise<void> {
           {
             type: 'list',
             name: 'subChoice',
-            message: 'Default Code Settings:\nUse ↑/↓ to navigate, Enter to select',
+            message: 'Default Code Settings',
             choices: [
               { name: `1: Timeout in Seconds (Current: ${params.defaultCodeSettings.timeoutSeconds})`, value: 'timeout' },
               { name: `2: Number of Attempts (Current: ${params.defaultCodeSettings.numberOfAttempts})`, value: 'attempts' },
               { name: 'Cancel', value: 'cancel' },
               { name: 'Save and Back', value: 'save' },
             ],
+            prefix: '',
           },
         ]);
 
@@ -115,6 +119,7 @@ export async function showParametersMenu(): Promise<void> {
               return !isNaN(num) && num >= 1 ? true : 'Must be a number ≥ 1';
             },
           );
+          if (value === null) break;
           params.defaultCodeSettings.timeoutSeconds = Number(value);
         } else if (subChoice === 'attempts') {
           const value = await promptInput(
@@ -125,6 +130,7 @@ export async function showParametersMenu(): Promise<void> {
               return !isNaN(num) && num >= 1 ? true : 'Must be a number ≥ 1';
             },
           );
+          if (value === null) break;
           params.defaultCodeSettings.numberOfAttempts = Number(value);
         }
       }
@@ -138,13 +144,14 @@ export async function showParametersMenu(): Promise<void> {
           {
             type: 'list',
             name: 'subChoice',
-            message: 'Default Wallet Address:\nUse ↑/↓ to navigate, Enter to select',
+            message: 'Default Wallet Address',
             choices: [
               { name: `1: Solana Wallet Address (secret) (Current: ${solanaAddress ? '******' : 'None'})`, value: 'address' },
               { name: `2: Wallet Name (Current: ${params.defaultWalletAddress.walletName || 'None'})`, value: 'name' },
               { name: 'Cancel', value: 'cancel' },
               { name: 'Save and Back', value: 'save' },
             ],
+            prefix: '',
           },
         ]);
 
@@ -161,19 +168,21 @@ export async function showParametersMenu(): Promise<void> {
         if (subChoice === 'address') {
           const value = await promptInput(
             'Enter Solana Wallet Address',
-            '******',
+            solanaAddress || '******',
             (input) => {
               if (!input) return true;
               return /^[1-9A-Za-z]{43,44}$/.test(input) ? true : 'Invalid Solana wallet address';
             },
             true,
           );
+          if (value === null) break;
           await storeSecret('solanaWalletAddress', value, encryptionKey);
         } else if (subChoice === 'name') {
           const value = await promptInput(
             'Enter Wallet Name',
             params.defaultWalletAddress.walletName,
           );
+          if (value === null) break;
           params.defaultWalletAddress.walletName = value;
         }
       }
