@@ -2,27 +2,42 @@
 // Overview: Implements a hierarchical menu for editing parameters (non-secret in data/parameters.json, secret in data/secrets.json.enc).
 // - Main Menu: Lists Set Parameters, Exit (terminates program).
 // - Parameter Menu: Lists categories (e.g., Code Settings, Wallet Address). Cancel returns to Main Menu.
-// - Sub-Menus: Edit parameters. Non-secrets show current value; secrets show ****** (secret). Cancel restores sub-menu values; Save and Back persists changes.
+// - Sub-Menus: Edit parameters. Non-secrets show current value; secrets show ******. Cancel restores sub-menu values; Save and Back persists changes.
+// - Secrets: Displayed as "[description] (secret)" (e.g., "Solana Wallet Address (secret)") with ******, never plain text.
 // Future Development: Add new parameter categories to showParametersMenu, new sub-menus for parameters.
-// - For secrets, use retrieveSecret/storeSecret from src/utils/secrets.ts, display as ****** (secret).
+// - For secrets, use retrieveSecret/storeSecret from src/utils/secrets.ts, display as [description] (secret) with ******.
 // - Update subChoice choices with new parameters, maintain Cancel/Save and Back behavior.
 // Deep Repo Analysis: Check data/parameters.json, data/secrets.json.enc, src/config/database-schema.ts, src/utils/secrets.ts.
 
 import inquirer from 'inquirer';
+import { createInterface } from 'readline';
 import { Parameters, ParametersSchema } from '../../config/database-schema';
-import { readParameters, writeParameters } from '../parameters';
 import { getEncryptionKey, retrieveSecret, storeSecret } from '../secrets';
+import { readParameters, writeParameters } from '../parameters';
+
+async function clearScreen(): Promise<void> {
+  // Clears terminal screen before each menu prompt to reduce clutter.
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  await new Promise<void>((resolve) => {
+    process.stdout.write('\x1Bc', () => {
+      rl.close();
+      resolve();
+    });
+  });
+}
 
 async function promptInput<T>(
   message: string,
   current: T,
   validate?: (input: string) => string | true,
+  isSecret: boolean = false,
 ): Promise<string> {
+  await clearScreen();
   const { value } = await inquirer.prompt([
     {
-      type: 'input',
+      type: isSecret ? 'password' : 'input',
       name: 'value',
-      message: `${message} [${current}]`,
+      message: `${message} ${isSecret ? '' : `[${current}]`}`,
       validate,
     },
   ]);
@@ -30,6 +45,7 @@ async function promptInput<T>(
 }
 
 export async function showMainMenu(options: string[]): Promise<string> {
+  await clearScreen();
   const choices = options.map((opt, i) => ({
     name: `${i}: ${opt}`,
     value: i.toString(),
@@ -52,6 +68,7 @@ export async function showParametersMenu(): Promise<void> {
   const encryptionKey = await getEncryptionKey();
 
   while (true) {
+    await clearScreen();
     const { choice } = await inquirer.prompt([
       {
         type: 'list',
@@ -70,6 +87,7 @@ export async function showParametersMenu(): Promise<void> {
     if (choice === 'code') {
       const originalCodeSettings = { ...params.defaultCodeSettings };
       while (true) {
+        await clearScreen();
         const { subChoice } = await inquirer.prompt([
           {
             type: 'list',
@@ -120,6 +138,7 @@ export async function showParametersMenu(): Promise<void> {
       const originalWalletAddress = { ...params.defaultWalletAddress };
       const originalSolanaAddress = await retrieveSecret('solanaWalletAddress', encryptionKey);
       while (true) {
+        await clearScreen();
         const solanaAddress = await retrieveSecret('solanaWalletAddress', encryptionKey);
         const { subChoice } = await inquirer.prompt([
           {
@@ -127,7 +146,7 @@ export async function showParametersMenu(): Promise<void> {
             name: 'subChoice',
             message: 'Default Wallet Address:\nUse ↑/↓ to navigate, Enter to select',
             choices: [
-              { name: `1: Solana Wallet Address (Current: ${solanaAddress ? '****** (secret)' : 'None'})`, value: 'address' },
+              { name: `1: Solana Wallet Address (secret) (Current: ${solanaAddress ? '******' : 'None'})`, value: 'address' },
               { name: `2: Wallet Name (Current: ${params.defaultWalletAddress.walletName || 'None'})`, value: 'name' },
               { name: 'Cancel', value: 'cancel' },
               { name: 'Save and Back', value: 'save' },
@@ -148,11 +167,12 @@ export async function showParametersMenu(): Promise<void> {
         if (subChoice === 'address') {
           const value = await promptInput(
             'Enter Solana Wallet Address',
-            solanaAddress || '',
+            '******',
             (input) => {
               if (!input) return true;
               return /^[1-9A-Za-z]{43,44}$/.test(input) ? true : 'Invalid Solana wallet address';
             },
+            true,
           );
           await storeSecret('solanaWalletAddress', value, encryptionKey);
         } else if (subChoice === 'name') {

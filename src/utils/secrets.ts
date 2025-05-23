@@ -19,15 +19,16 @@ const SECRETS_PATH = path.join(__dirname, '../../data/secrets.json.enc');
 const KEY_PATH = path.join(__dirname, '../../data/encryption_key.json');
 let encryptionKey: string | null = null;
 
-async function getEncryptionKey(): Promise<string> {
-  // Prompts for encryption key twice (initial and confirmation) if not set, stores in memory, saves to KEY_PATH for recovery.
-  // Uses plain text input (not masked) for visibility during creation.
-  // Not committed to GitHub (.gitignore).
+export async function getEncryptionKey(): Promise<string> {
   if (encryptionKey) return encryptionKey;
   try {
     const data = await fs.readFile(KEY_PATH, 'utf-8');
-    encryptionKey = JSON.parse(data).key;
-    return encryptionKey;
+    const parsed = JSON.parse(data);
+    if (typeof parsed.key === 'string' && parsed.key.length >= 8) {
+      encryptionKey = parsed.key;
+    } else {
+      throw new Error('Invalid key in encryption_key.json');
+    }
   } catch {
     const { key, confirmKey } = await inquirer.prompt([
       {
@@ -45,12 +46,12 @@ async function getEncryptionKey(): Promise<string> {
     ]);
     encryptionKey = key;
     await fs.writeFile(KEY_PATH, JSON.stringify({ key }), 'utf-8');
-    return key;
   }
+  if (!encryptionKey) throw new Error('Failed to set encryption key');
+  return encryptionKey;
 }
 
 export async function encryptSecret(value: string, key: string): Promise<string> {
-  // Encrypts value using AES-256-GCM, returns base64 ciphertext (iv:ciphertext:authTag).
   try {
     const iv = randomBytes(12);
     const cipher = createCipheriv('aes-256-gcm', Buffer.from(key.padEnd(32, '0')), iv);
@@ -64,7 +65,6 @@ export async function encryptSecret(value: string, key: string): Promise<string>
 }
 
 export async function decryptSecret(ciphertext: string, key: string): Promise<string> {
-  // Decrypts base64 ciphertext (iv:ciphertext:authTag), returns plain text.
   try {
     const [iv, encrypted, authTag] = ciphertext.split(':');
     if (!iv || !encrypted || !authTag) throw new Error('Invalid ciphertext format');
@@ -79,7 +79,6 @@ export async function decryptSecret(ciphertext: string, key: string): Promise<st
 }
 
 export async function storeSecret(secretKey: string, value: string, encryptionKey: string): Promise<void> {
-  // Encrypts and stores a secret in secrets.json.enc under secretKey.
   let secrets: Record<string, string> = {};
   try {
     const data = await fs.readFile(SECRETS_PATH, 'utf-8');
@@ -89,14 +88,13 @@ export async function storeSecret(secretKey: string, value: string, encryptionKe
   await fs.writeFile(SECRETS_PATH, JSON.stringify(secrets, null, 2), 'utf-8');
 }
 
-export async function retrieveSecret(secretKey: string, encryptionKey: string): Promise<string> {
-  // Retrieves and decrypts a secret by secretKey, returns empty string if not found.
+export async function retrieveSecret(secretKey: string, encryptionKey: string): Promise<string | null> {
   try {
     const data = await fs.readFile(SECRETS_PATH, 'utf-8');
     const secrets = JSON.parse(data);
-    if (!secrets[secretKey]) return '';
+    if (!secrets[secretKey]) return null;
     return await decryptSecret(secrets[secretKey], encryptionKey);
   } catch {
-    return '';
+    return null;
   }
 }
