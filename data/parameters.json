@@ -1,10 +1,10 @@
 {
   "defaultCodeSettings": {
     "timeoutSeconds": 20,
-    "numberOfAttempts": 3
+    "numberOfAttempts": 2
   },
   "defaultWalletAddress": {
-    "solanaWalletAddress": "",
-    "walletName": ""
+    "solanaWalletAddress": "68jHEeUr1MMTkndgN4uE9FVn8qyJi37bZ15VVstTCdXx",
+    "walletName": "phantom1"
   }
 }

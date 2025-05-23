@@ -2,7 +2,7 @@
 // Parameters: options array for main menu, none for parameters menu
 // Returns: Selected option key for main menu, void for parameters menu
 import inquirer from 'inquirer';
-import { Parameters, ParametersSchema } from '../../config/database-schema'; // Fixed path
+import { Parameters, ParametersSchema } from '../../config/database-schema';
 import { readParameters, writeParameters } from '../parameters';
 
 async function promptInput<T>(
@@ -32,7 +32,7 @@ export async function showMainMenu(options: string[]): Promise<string> {
     {
       type: 'list',
       name: 'choice',
-      message: 'Welcome to DLLM_Bot_1\nUse ↑/↓ to navigate, Enter to select, Ctrl+C to cancel',
+      message: 'Welcome to DLLM_Bot_1\nUse ↑/↓ to navigate, Enter to select',
       choices,
     },
   ]);
@@ -47,35 +47,38 @@ export async function showParametersMenu(): Promise<void> {
       {
         type: 'list',
         name: 'choice',
-        message: 'Parameters Menu:\nUse ↑/↓ to navigate, Enter to select, Ctrl+C to cancel',
+        message: 'Parameters Menu:\nUse ↑/↓ to navigate, Enter to select',
         choices: [
           { name: '1: Default Code Settings', value: 'code' },
           { name: '2: Default Wallet Address', value: 'wallet' },
-          { name: 'Back', value: 'back' },
-          { name: 'Exit', value: 'exit' },
+          { name: 'Cancel', value: 'cancel' },
         ],
       },
     ]);
 
-    if (choice === 'back' || choice === 'exit') break;
+    if (choice === 'cancel') break;
 
     if (choice === 'code') {
+      const originalCodeSettings = { ...params.defaultCodeSettings }; // Store original
       while (true) {
         const { subChoice } = await inquirer.prompt([
           {
             type: 'list',
             name: 'subChoice',
-            message: 'Default Code Settings:\nUse ↑/↓ to navigate, Enter to select, Ctrl+C to cancel',
+            message: 'Default Code Settings:\nUse ↑/↓ to navigate, Enter to select',
             choices: [
               { name: `1: Timeout in Seconds (Current: ${params.defaultCodeSettings.timeoutSeconds})`, value: 'timeout' },
               { name: `2: Number of Attempts (Current: ${params.defaultCodeSettings.numberOfAttempts})`, value: 'attempts' },
-              { name: 'Back', value: 'back' },
-              { name: 'Save and Exit', value: 'save' },
+              { name: 'Cancel', value: 'cancel' },
+              { name: 'Save and Back', value: 'save' },
             ],
           },
         ]);
 
-        if (subChoice === 'back') break;
+        if (subChoice === 'cancel') {
+          params.defaultCodeSettings = originalCodeSettings; // Restore only code settings
+          break;
+        }
         if (subChoice === 'save') {
           await writeParameters(params);
           console.log('Parameters saved successfully!');
@@ -105,22 +108,26 @@ export async function showParametersMenu(): Promise<void> {
         }
       }
     } else if (choice === 'wallet') {
+      const originalWalletAddress = { ...params.defaultWalletAddress }; // Store original
       while (true) {
         const { subChoice } = await inquirer.prompt([
           {
             type: 'list',
             name: 'subChoice',
-            message: 'Default Wallet Address:\nUse ↑/↓ to navigate, Enter to select, Ctrl+C to cancel',
+            message: 'Default Wallet Address:\nUse ↑/↓ to navigate, Enter to select',
             choices: [
               { name: `1: Solana Wallet Address (Current: ${params.defaultWalletAddress.solanaWalletAddress || 'None'})`, value: 'address' },
               { name: `2: Wallet Name (Current: ${params.defaultWalletAddress.walletName || 'None'})`, value: 'name' },
-              { name: 'Back', value: 'back' },
-              { name: 'Save and Exit', value: 'save' },
+              { name: 'Cancel', value: 'cancel' },
+              { name: 'Save and Back', value: 'save' },
             ],
           },
         ]);
 
-        if (subChoice === 'back') break;
+        if (subChoice === 'cancel') {
+          params.defaultWalletAddress = originalWalletAddress; // Restore only wallet address
+          break;
+        }
         if (subChoice === 'save') {
           await writeParameters(params);
           console.log('Parameters saved successfully!');
@@ -133,7 +140,7 @@ export async function showParametersMenu(): Promise<void> {
             params.defaultWalletAddress.solanaWalletAddress,
             (input) => {
               if (!input) return true;
-              return /^[1-9A-HJ-NP-Za-km]{43,44}$/.test(input) ? true : 'Invalid Solana wallet address';
+              return /^[1-9A-Za-z]{43,44}$/.test(input) ? true : 'Invalid Solana wallet address';
             },
           );
           params.defaultWalletAddress.solanaWalletAddress = value;
@@ -148,16 +155,3 @@ export async function showParametersMenu(): Promise<void> {
     }
   }
 }
-
-// Handle Ctrl+C cancellation
-process.on('SIGINT', async () => {
-  const { confirmed } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'confirmed',
-      message: 'Confirm cancellation?',
-      default: false,
-    },
-  ]);
-  if (confirmed) process.exit(0);
-});
