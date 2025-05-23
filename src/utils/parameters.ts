@@ -1,9 +1,11 @@
-// Purpose: Manages reading, writing, and initializing parameters
-// Parameters: None for read/init, Parameters object for write
-// Returns: Parameters object for read/init, void for write
+// Purpose: Manages reading, writing, and initializing non-secret parameters in data/parameters.json.
+// Overview: Handles non-secret parameters (e.g., timeoutSeconds, walletName), delegates secrets to src/utils/secrets.ts.
+// Future Development: Add new non-secret parameters to ParametersSchema, update initParameters.
+// Deep Repo Analysis: Check data/parameters.json for non-secrets, data/secrets.json.enc for secrets, src/utils/secrets.ts for encryption.
+
 import fs from 'fs/promises';
 import path from 'path';
-import { ParametersSchema, Parameters } from '../config/database-schema'; // Fixed path
+import { ParametersSchema, Parameters } from '../config/database-schema';
 
 const PARAMETERS_PATH = path.join(__dirname, '../../data/parameters.json');
 
@@ -13,7 +15,7 @@ export async function readParameters(): Promise<Parameters> {
     const parsed = JSON.parse(data);
     return ParametersSchema.parse(parsed);
   } catch (error) {
-    console.error('Failed to read parameters, using defaults:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Failed to read parameters, using defaults:', error instanceof Error ? error.message : 'Unknown error occurred');
     return initParameters();
   }
 }
@@ -23,7 +25,7 @@ export async function writeParameters(params: Parameters): Promise<void> {
     const validated = ParametersSchema.parse(params);
     await fs.writeFile(PARAMETERS_PATH, JSON.stringify(validated, null, 2), 'utf-8');
   } catch (error) {
-    console.error('Failed to save parameters, please try again:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Failed to save parameters:', error instanceof Error ? error.message : 'Unknown error occurred');
     throw error;
   }
 }
@@ -35,7 +37,6 @@ export function initParameters(): Parameters {
       numberOfAttempts: 3,
     },
     defaultWalletAddress: {
-      solanaWalletAddress: '',
       walletName: '',
     },
   };

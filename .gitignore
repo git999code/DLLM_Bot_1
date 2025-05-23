@@ -1,4 +1,5 @@
-# Ignore wallet keypair file
-wallet-keypair.json
+# Secret files
+data/secrets.json.enc
+data/encryption_key.json
 node_modules/
 dist/

@@ -1,24 +1,23 @@
 // Purpose: Provides agnostic menu navigation using inquirer for parameter management.
-// Overview: Implements a hierarchical menu for editing parameters stored in data/parameters.json.
-// - Main Menu: Displays top-level options (0: Set Parameters, Exit). Exit terminates the program.
-// - Parameter Menu: Lists parameter categories (e.g., Default Code Settings, Default Wallet Address). Cancel returns to Main Menu.
-// - Sub-Menus: Allow editing specific parameters (e.g., timeoutSeconds, walletName). Cancel restores original sub-menu values; Save and Back persists changes to file.
-// Future Development: When adding new parameters, maintain this behavior:
-// - Add new categories to showParametersMenu choices.
-// - Create new sub-menus with Cancel (restores sub-menu values) and Save and Back (saves to file).
-// - Reload original sub-menu values on Cancel using a copy of the relevant params subset.
-// Deep Repo Analysis: Check data/parameters.json schema, src/config/database-schema.ts for validation, and src/utils/parameters.ts for file I/O.
+// Overview: Implements a hierarchical menu for editing parameters (non-secret in data/parameters.json, secret in data/secrets.json.enc).
+// - Main Menu: Lists Set Parameters, Exit (terminates program).
+// - Parameter Menu: Lists categories (e.g., Code Settings, Wallet Address). Cancel returns to Main Menu.
+// - Sub-Menus: Edit parameters. Non-secrets show current value; secrets show ****** (secret). Cancel restores sub-menu values; Save and Back persists changes.
+// Future Development: Add new parameter categories to showParametersMenu, new sub-menus for parameters.
+// - For secrets, use retrieveSecret/storeSecret from src/utils/secrets.ts, display as ****** (secret).
+// - Update subChoice choices with new parameters, maintain Cancel/Save and Back behavior.
+// Deep Repo Analysis: Check data/parameters.json, data/secrets.json.enc, src/config/database-schema.ts, src/utils/secrets.ts.
 
 import inquirer from 'inquirer';
 import { Parameters, ParametersSchema } from '../../config/database-schema';
 import { readParameters, writeParameters } from '../parameters';
+import { getEncryptionKey, retrieveSecret, storeSecret } from '../secrets';
 
 async function promptInput<T>(
   message: string,
   current: T,
   validate?: (input: string) => string | true,
 ): Promise<string> {
-  // Prompts user for input, pre-filling current value, with optional validation.
   const { value } = await inquirer.prompt([
     {
       type: 'input',
@@ -31,8 +30,6 @@ async function promptInput<T>(
 }
 
 export async function showMainMenu(options: string[]): Promise<string> {
-  // Displays main menu with provided options (e.g., Set Parameters) plus Exit.
-  // Returns selected option key (e.g., '0' for Set Parameters, 'exit' to terminate).
   const choices = options.map((opt, i) => ({
     name: `${i}: ${opt}`,
     value: i.toString(),
@@ -51,10 +48,8 @@ export async function showMainMenu(options: string[]): Promise<string> {
 }
 
 export async function showParametersMenu(): Promise<void> {
-  // Displays parameter menu for selecting categories (e.g., Code Settings, Wallet Address).
-  // Cancel returns to main menu without saving.
-  // Sub-menus handle parameter editing; Save and Back writes to data/parameters.json.
   let params = await readParameters();
+  const encryptionKey = await getEncryptionKey();
 
   while (true) {
     const { choice } = await inquirer.prompt([
@@ -73,8 +68,7 @@ export async function showParametersMenu(): Promise<void> {
     if (choice === 'cancel') break;
 
     if (choice === 'code') {
-      // Sub-menu for editing timeoutSeconds and numberOfAttempts.
-      const originalCodeSettings = { ...params.defaultCodeSettings }; // Store original for Cancel
+      const originalCodeSettings = { ...params.defaultCodeSettings };
       while (true) {
         const { subChoice } = await inquirer.prompt([
           {
@@ -91,7 +85,7 @@ export async function showParametersMenu(): Promise<void> {
         ]);
 
         if (subChoice === 'cancel') {
-          params.defaultCodeSettings = originalCodeSettings; // Restore only code settings
+          params.defaultCodeSettings = originalCodeSettings;
           break;
         }
         if (subChoice === 'save') {
@@ -123,16 +117,17 @@ export async function showParametersMenu(): Promise<void> {
         }
       }
     } else if (choice === 'wallet') {
-      // Sub-menu for editing solanaWalletAddress and walletName.
-      const originalWalletAddress = { ...params.defaultWalletAddress }; // Store original for Cancel
+      const originalWalletAddress = { ...params.defaultWalletAddress };
+      const originalSolanaAddress = await retrieveSecret('solanaWalletAddress', encryptionKey);
       while (true) {
+        const solanaAddress = await retrieveSecret('solanaWalletAddress', encryptionKey);
         const { subChoice } = await inquirer.prompt([
           {
             type: 'list',
             name: 'subChoice',
             message: 'Default Wallet Address:\nUse ↑/↓ to navigate, Enter to select',
             choices: [
-              { name: `1: Solana Wallet Address (Current: ${params.defaultWalletAddress.solanaWalletAddress || 'None'})`, value: 'address' },
+              { name: `1: Solana Wallet Address (Current: ${solanaAddress ? '****** (secret)' : 'None'})`, value: 'address' },
               { name: `2: Wallet Name (Current: ${params.defaultWalletAddress.walletName || 'None'})`, value: 'name' },
               { name: 'Cancel', value: 'cancel' },
               { name: 'Save and Back', value: 'save' },
@@ -141,7 +136,7 @@ export async function showParametersMenu(): Promise<void> {
         ]);
 
         if (subChoice === 'cancel') {
-          params.defaultWalletAddress = originalWalletAddress; // Restore only wallet address
+          params.defaultWalletAddress = originalWalletAddress;
           break;
         }
         if (subChoice === 'save') {
@@ -152,14 +147,14 @@ export async function showParametersMenu(): Promise<void> {
 
         if (subChoice === 'address') {
           const value = await promptInput(
-            'Enter Solana Wallet Address (e.g., 7C4js...)',
-            params.defaultWalletAddress.solanaWalletAddress,
+            'Enter Solana Wallet Address',
+            solanaAddress || '',
             (input) => {
               if (!input) return true;
               return /^[1-9A-Za-z]{43,44}$/.test(input) ? true : 'Invalid Solana wallet address';
             },
           );
-          params.defaultWalletAddress.solanaWalletAddress = value;
+          await storeSecret('solanaWalletAddress', value, encryptionKey);
         } else if (subChoice === 'name') {
           const value = await promptInput(
             'Enter Wallet Name',

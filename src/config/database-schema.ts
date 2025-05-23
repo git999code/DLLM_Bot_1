@@ -1,5 +1,8 @@
-// Purpose: Defines Zod schema for validating parameters.json
-// Returns: Zod schema and TypeScript type for parameters
+// Purpose: Defines Zod schema for validating non-secret parameters in data/parameters.json.
+// Overview: Excludes secret parameters (e.g., solanaWalletAddress), validated separately in src/utils/secrets.ts.
+// Future Development: Add new non-secret parameters here, update src/utils/parameters.ts for I/O.
+// Deep Repo Analysis: Check src/utils/secrets.ts for secret handling, data/parameters.json for schema.
+
 import { z } from 'zod';
 
 export const ParametersSchema = z.object({
@@ -8,7 +11,6 @@ export const ParametersSchema = z.object({
     numberOfAttempts: z.number().min(1, 'Attempts must be at least 1'),
   }),
   defaultWalletAddress: z.object({
-    solanaWalletAddress: z.string().min(0).regex(/^$|[1-9A-Za-z]{43,44}$/, 'Invalid Solana wallet address'),
     walletName: z.string().min(0),
   }),
 });
