@@ -5,7 +5,7 @@
   },
   "defaultWalletAddresses": [
     {
-      "id": "0d1fdbb9-b896-4306-8217-7020bcb605c1",
+      "id": "13d7f399-6adf-4e8f-9f40-d64a16c28b71",
       "name": "GMGN1",
       "order": 1
     },
@@ -15,5 +15,11 @@
       "order": 2
     }
   ],
-  "defaultRpcUrls": []
+  "defaultRpcUrls": [
+    {
+      "id": "4d76f308-a31d-4d94-84d6-183b4c8da131",
+      "name": "QuickNode (SolDecoder)",
+      "order": 1
+    }
+  ]
 }

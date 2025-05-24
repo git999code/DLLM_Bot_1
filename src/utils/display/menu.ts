@@ -1,14 +1,14 @@
 // Purpose: Provides agnostic menu navigation using inquirer for parameter management.
 // Overview: Implements a hierarchical menu for editing parameters (non-secret in data/parameters.json, secret in data/secrets.json.enc).
 // - Main Menu: Lists Set Parameters, Exit (terminates program).
-// - Parameter Menu: Lists categories (e.g., Code Settings, Wallet Addresses, RPC URLs). Cancel returns to Main Menu.
-// - Sub-Menus: Edit parameters. Non-secrets show current value; secrets show ******. Cancel restores sub-menu values; Save and Back persists changes.
+// - Parameter Menu: Lists categories (e.g., General Settings, Wallets, RPC URLs). Back returns to Main Menu.
+// - Sub-Menus: Non-editable menus (e.g., wallet selection) use "Back". Editable menus (e.g., wallet edit) use "Cancel" (discard changes) and "Save and Back" (persist changes). This is the default behavior for all menus.
 // - Secrets: Displayed as "[description] (secret)" (e.g., "Solana Wallet Address (secret)") with ******, never plain text.
-// - Wallet Addresses/RPC URLs: Multiple entries with unique names (enforced at creation/edit), ordered by user-defined numbers (>0, sorted ascending, reindexed 1, 2, 3, ...). Default wallet/URL (order 1) labeled "(default)". Deletion with confirmation prompt.
+// - Wallets/RPCs: Multiple entries with unique names (enforced at creation/edit), ordered by user-defined numbers (>0, sorted ascending, reindexed 1, 2, 3, ...). Edited wallet/URL gains precedence for its order, shifting others. Default wallet/URL (order 1) labeled "(default)". Deletion with confirmation.
 // Windows TTY Issues: inquirer prompts may hang on Windows due to screen clearing. Use ANSI escape codes (\x1B[2J\x1B[H) only in menu prompts, avoid in promptInput.
 // Future Development: Add new parameter categories to showParametersMenu, new sub-menus for parameters.
 // - For secrets, use retrieveSecret/storeSecret from src/utils/secrets.ts, display as [description] (secret) with ******.
-// - Update subChoice choices with new parameters, maintain Cancel/Save and Back behavior, ensure unique names and valid orders.
+// - Update subChoice choices with new parameters, maintain Back for non-editable menus, Cancel/Save and Back for editable menus, ensure unique names and valid orders.
 // Deep Repo Analysis: Check data/parameters.json, data/secrets.json.enc, src/config/database-schema.ts, src/utils/secrets.ts, src/utils/parameters.ts, src/utils/solana/pingRpc.ts for RPC validation.
 
 import inquirer from 'inquirer';
@@ -75,16 +75,16 @@ export async function showParametersMenu(): Promise<void> {
         name: 'choice',
         message: 'Parameters Menu',
         choices: [
-          { name: '1: Default Code Settings', value: 'code' },
-          { name: '2: Default Wallet Addresses', value: 'wallets' },
-          { name: '3: Default RPC URLs', value: 'rpcs' },
-          { name: 'Cancel', value: 'cancel' },
+          { name: '1: General Settings (timeout etc)', value: 'code' },
+          { name: '2: Wallets', value: 'wallets' },
+          { name: '3: RPC URLs', value: 'rpcs' },
+          { name: 'Back', value: 'back' },
         ],
         prefix: '',
       },
     ]);
 
-    if (choice === 'cancel') break;
+    if (choice === 'back') break;
 
     if (choice === 'code') {
       const originalCodeSettings = { ...params.defaultCodeSettings };
@@ -94,7 +94,7 @@ export async function showParametersMenu(): Promise<void> {
           {
             type: 'list',
             name: 'subChoice',
-            message: 'Default Code Settings',
+            message: 'General Settings',
             choices: [
               { name: `1: Timeout in Seconds (Current: ${params.defaultCodeSettings.timeoutSeconds})`, value: 'timeout' },
               { name: `2: Number of Attempts (Current: ${params.defaultCodeSettings.numberOfAttempts})`, value: 'attempts' },
@@ -150,33 +150,19 @@ export async function showParametersMenu(): Promise<void> {
             name: `${index + 2}: Edit Wallet ${wallet.name}${wallet.order === sortedWallets[0].order ? ' (default wallet)' : ''}`,
             value: wallet.id,
           })),
-          { name: 'Cancel', value: 'cancel' },
-          { name: 'Save and Back', value: 'save' },
+          { name: 'Back', value: 'back' },
         ];
         const { subChoice } = await inquirer.prompt([
           {
             type: 'list',
             name: 'subChoice',
-            message: 'Default Wallet Addresses',
+            message: 'Wallets',
             choices,
             prefix: '',
           },
         ]);
 
-        if (subChoice === 'cancel') {
-          params.defaultWalletAddresses = originalWallets;
-          break;
-        }
-        if (subChoice === 'save') {
-          const sorted = [...params.defaultWalletAddresses].sort((a, b) => a.order - b.order);
-          params.defaultWalletAddresses = sorted.map((wallet, index) => ({
-            ...wallet,
-            order: index + 1, // Reindex to 1, 2, 3, ...
-          }));
-          await writeParameters(params);
-          console.log('Wallet addresses saved successfully!');
-          return;
-        }
+        if (subChoice === 'back') break;
 
         if (subChoice === 'add') {
           const existingNames = params.defaultWalletAddresses.map(w => w.name);
@@ -241,10 +227,20 @@ export async function showParametersMenu(): Promise<void> {
 
             if (editChoice === 'cancel') break;
             if (editChoice === 'save') {
-              const sorted = [...params.defaultWalletAddresses].sort((a, b) => a.order - b.order);
-              params.defaultWalletAddresses = sorted.map((w, index) => ({
+              // Prioritize edited wallet's order, shift others
+              const editedOrder = wallet.order;
+              const otherWallets = params.defaultWalletAddresses.filter(w => w.id !== wallet.id);
+              const sortedOthers = otherWallets.sort((a, b) => a.order - b.order);
+              let newOrder = 1;
+              params.defaultWalletAddresses = [
+                { ...wallet, order: editedOrder }, // Edited wallet keeps its order
+                ...sortedOthers.map(w => ({
+                  ...w,
+                  order: w.order === editedOrder ? ++newOrder : newOrder++,
+                })),
+              ].sort((a, b) => a.order - b.order).map((w, index) => ({
                 ...w,
-                order: index + 1,
+                order: index + 1, // Reindex to 1, 2, 3, ...
               }));
               await writeParameters(params);
               console.log('Wallet updated successfully!');
@@ -316,33 +312,19 @@ export async function showParametersMenu(): Promise<void> {
             name: `${index + 2}: Edit RPC URL ${rpc.name}${rpc.order === sortedRpcs[0].order ? ' (default)' : ''}`,
             value: rpc.id,
           })),
-          { name: 'Cancel', value: 'cancel' },
-          { name: 'Save and Back', value: 'save' },
+          { name: 'Back', value: 'back' },
         ];
         const { subChoice } = await inquirer.prompt([
           {
             type: 'list',
             name: 'subChoice',
-            message: 'Default RPC URLs',
+            message: 'RPC URLs',
             choices,
             prefix: '',
           },
         ]);
 
-        if (subChoice === 'cancel') {
-          params.defaultRpcUrls = originalRpcs;
-          break;
-        }
-        if (subChoice === 'save') {
-          const sorted = [...params.defaultRpcUrls].sort((a, b) => a.order - b.order);
-          params.defaultRpcUrls = sorted.map((rpc, index) => ({
-            ...rpc,
-            order: index + 1,
-          }));
-          await writeParameters(params);
-          console.log('RPC URLs saved successfully!');
-          return;
-        }
+        if (subChoice === 'back') break;
 
         if (subChoice === 'add') {
           const existingNames = params.defaultRpcUrls.map(r => r.name);
@@ -370,7 +352,10 @@ export async function showParametersMenu(): Promise<void> {
             if (urlValue === null) break;
             if (urlValue) {
               const valid = await pingRpcUrl(urlValue);
-              if (valid) break;
+              if (valid) {
+                console.log('RPC URL test passed successfully!');
+                break;
+              }
               const { retry } = await inquirer.prompt([
                 {
                   type: 'confirm',
@@ -429,8 +414,18 @@ export async function showParametersMenu(): Promise<void> {
 
             if (editChoice === 'cancel') break;
             if (editChoice === 'save') {
-              const sorted = [...params.defaultRpcUrls].sort((a, b) => a.order - b.order);
-              params.defaultRpcUrls = sorted.map((r, index) => ({
+              // Prioritize edited RPC's order, shift others
+              const editedOrder = rpc.order;
+              const otherRpcs = params.defaultRpcUrls.filter(r => r.id !== rpc.id);
+              const sortedOthers = otherRpcs.sort((a, b) => a.order - b.order);
+              let newOrder = 1;
+              params.defaultRpcUrls = [
+                { ...rpc, order: editedOrder }, // Edited RPC keeps its order
+                ...sortedOthers.map(r => ({
+                  ...r,
+                  order: r.order === editedOrder ? ++newOrder : newOrder++,
+                })),
+              ].sort((a, b) => a.order - b.order).map((r, index) => ({
                 ...r,
                 order: index + 1,
               }));
@@ -473,7 +468,10 @@ export async function showParametersMenu(): Promise<void> {
                 if (value === null) break;
                 if (value) {
                   const valid = await pingRpcUrl(value);
-                  if (valid) break;
+                  if (valid) {
+                    console.log('RPC URL test passed successfully!');
+                    break;
+                  }
                   const { retry } = await inquirer.prompt([
                     {
                       type: 'confirm',
