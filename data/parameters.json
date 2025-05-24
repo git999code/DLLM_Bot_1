@@ -3,7 +3,17 @@
     "timeoutSeconds": 20,
     "numberOfAttempts": 3
   },
-  "defaultWalletAddress": {
-    "walletName": "phantom1"
-  }
+  "defaultWalletAddresses": [
+    {
+      "id": "0d1fdbb9-b896-4306-8217-7020bcb605c1",
+      "name": "GMGN1",
+      "order": 1
+    },
+    {
+      "id": "f1ea0936-be7b-45c4-820b-863dce38a313",
+      "name": "phantom1",
+      "order": 2
+    }
+  ],
+  "defaultRpcUrls": []
 }
