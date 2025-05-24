@@ -1,9 +1,9 @@
 // Purpose: Main entry point for DLLM_Bot_1, orchestrating menu navigation.
 // Overview: Runs main menu loop, delegates to parameter setting (Option 0).
 // Archive: Unused code from previous development (e.g., Check portfolio balance, Fetch pools by token CA) is archived in src/archive/index_archive.ts and src/archive/pools.ts for future reference.
-// Deep Repo Analysis: Check src/utils/display/menu.ts for menu logic, src/archive/ for unused code, data/parameters.json and data/secrets.json.enc for parameters.
+// Deep Repo Analysis: Check src/data-acquisition/user-parameters/menu.ts for menu logic, src/archive/ for unused code, data/parameters.json and data/secrets.json.enc for parameters.
 
-import { showMainMenu, showParametersMenu } from './utils/display/menu';
+import { showMainMenu, showParametersMenu } from './data-acquisition/user-parameters/menu';
 
 async function main() {
   const options = ['Set Parameters'];

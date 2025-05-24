@@ -5,14 +5,19 @@
   },
   "defaultWalletAddresses": [
     {
-      "id": "13d7f399-6adf-4e8f-9f40-d64a16c28b71",
-      "name": "GMGN1",
+      "id": "f1ea0936-be7b-45c4-820b-863dce38a313",
+      "name": "phantom1",
       "order": 1
     },
     {
-      "id": "f1ea0936-be7b-45c4-820b-863dce38a313",
-      "name": "phantom1",
+      "id": "13d7f399-6adf-4e8f-9f40-d64a16c28b71",
+      "name": "GMGN1",
       "order": 2
+    },
+    {
+      "id": "54923802-91a3-4024-b587-52cd194357fc",
+      "name": "Jupiter1",
+      "order": 3
     }
   ],
   "defaultRpcUrls": [

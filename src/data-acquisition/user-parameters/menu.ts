@@ -1,47 +1,21 @@
-// Purpose: Provides agnostic menu navigation using inquirer for parameter management.
-// Overview: Implements a hierarchical menu for editing parameters (non-secret in data/parameters.json, secret in data/secrets.json.enc).
-// - Main Menu: Lists Set Parameters, Exit (terminates program).
-// - Parameter Menu: Lists categories (e.g., General Settings, Wallets, RPC URLs). Back returns to Main Menu.
-// - Sub-Menus: Non-editable menus (e.g., wallet selection) use "Back". Editable menus (e.g., wallet edit) use "Cancel" (discard changes) and "Save and Back" (persist changes). This is the default behavior for all menus.
-// - Secrets: Displayed as "[description] (secret)" (e.g., "Solana Wallet Address (secret)") with ******, never plain text.
+// Purpose: Implements project-specific menu navigation for user parameter management in DLLM_Bot_1.
+// Overview: Defines main and parameter menus for editing settings, wallets, and RPC URLs.
+// - showMainMenu: Displays top-level menu with Set Parameters and Exit.
+// - showParametersMenu: Manages General Settings, Wallets, RPC URLs with project-specific logic.
+// Menu Behavior (Agnostic): Inherited from src/utils/display/menuHandler.ts. Non-editable menus use "Back". Editable menus use "Cancel" (discard) and "Save and Back" (persist).
 // - Wallets/RPCs: Multiple entries with unique names (enforced at creation/edit), ordered by user-defined numbers (>0, sorted ascending, reindexed 1, 2, 3, ...). Edited wallet/URL gains precedence for its order, shifting others. Default wallet/URL (order 1) labeled "(default)". Deletion with confirmation.
-// Windows TTY Issues: inquirer prompts may hang on Windows due to screen clearing. Use ANSI escape codes (\x1B[2J\x1B[H) only in menu prompts, avoid in promptInput.
 // Future Development: Add new parameter categories to showParametersMenu, new sub-menus for parameters.
 // - For secrets, use retrieveSecret/storeSecret from src/utils/secrets.ts, display as [description] (secret) with ******.
-// - Update subChoice choices with new parameters, maintain Back for non-editable menus, Cancel/Save and Back for editable menus, ensure unique names and valid orders.
-// Deep Repo Analysis: Check data/parameters.json, data/secrets.json.enc, src/config/database-schema.ts, src/utils/secrets.ts, src/utils/parameters.ts, src/utils/solana/pingRpc.ts for RPC validation.
+// - Update subChoice choices with new parameters, maintain Back for non-editable menus, Cancel/Save and Back for editable menus.
+// Deep Repo Analysis: Check data/parameters.json, data/secrets.json.enc, src/config/database-schema.ts, src/utils/secrets.ts, src/utils/parameters.ts, src/utils/solana/pingRpc.ts, src/utils/display/menuHandler.ts.
 
 import inquirer from 'inquirer';
 import { v4 as uuidv4 } from 'uuid';
 import { Parameters, ParametersSchema } from '../../config/database-schema';
-import { getEncryptionKey, retrieveSecret, storeSecret } from '../secrets';
-import { readParameters, writeParameters } from '../parameters';
-import { pingRpcUrl } from '../solana/pingRpc';
-
-async function clearScreen(): Promise<void> {
-  // Clears terminal screen before each menu prompt to reduce clutter using ANSI escape sequence.
-  process.stdout.write('\x1B[2J\x1B[H');
-}
-
-async function promptInput<T>(
-  message: string,
-  current: T,
-  validate?: (input: string) => string | true,
-  isSecret: boolean = false,
-): Promise<string | null> {
-  const displayValue = isSecret ? '******' : current;
-  const { value } = await inquirer.prompt([
-    {
-      type: 'input',
-      name: 'value',
-      message: `${message} [${displayValue}]`,
-      validate,
-      prefix: '',
-    },
-  ]);
-  if (value === '') return null; // Cancel input
-  return value || String(current);
-}
+import { getEncryptionKey, retrieveSecret, storeSecret } from '../../utils/secrets';
+import { readParameters, writeParameters } from '../../utils/parameters';
+import { pingRpcUrl } from '../../utils/solana/pingRpc';
+import { clearScreen, promptInput } from '../../utils/display/menuHandler';
 
 export async function showMainMenu(options: string[]): Promise<string> {
   await clearScreen();

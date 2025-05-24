@@ -1,6 +1,6 @@
 ﻿Project Root Path: C:\Users\T999\CascadeProjects\DLLM_Bot_1
 Windows Username: T999
-Generated: 05/24/2025 13:50:59
+Generated: 05/24/2025 21:06:36
 ----------------------------------------
 
   .env
@@ -8986,6 +8986,8 @@ Generated: 05/24/2025 13:50:59
     [config]
       database-schema.ts
     [data-acquisition]
+      [user-parameters]
+        menu.ts
     [data-operations]
     index.ts
     [orchestrators]
@@ -8993,7 +8995,7 @@ Generated: 05/24/2025 13:50:59
     [types]
     [utils]
       [display]
-        menu.ts
+        menuHandler.ts
       helpers.ts
       parameters.ts
       parseJson.ts
