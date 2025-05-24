@@ -2,11 +2,13 @@
 // Overview: Defines main and parameter menus for editing settings, wallets, and RPC URLs.
 // - showMainMenu: Displays top-level menu with Set Parameters and Exit.
 // - showParametersMenu: Manages General Settings, Wallets, RPC URLs with project-specific logic.
-// Menu Behavior (Agnostic): Inherited from src/utils/display/menuHandler.ts. Non-editable menus use "Back". Editable menus use "Cancel" (discard) and "Save and Back" (persist).
+// Menu Behavior (Agnostic): Inherited from src/utils/display/menuHandler.ts.
+// - Non-editable menus: First layer (Parameters Menu) uses "Back to menu" to return to main menu. Deeper layers (Wallets, RPC URLs) use "Back" (previous layer) and "Back to menu" (main menu).
+// - Editable menus: Use "Cancel" (discard) and "Save and Back" (persist).
 // - Wallets/RPCs: Multiple entries with unique names (enforced at creation/edit), ordered by user-defined numbers (>0, sorted ascending, reindexed 1, 2, 3, ...). Edited wallet/URL gains precedence for its order, shifting others. Default wallet/URL (order 1) labeled "(default)". Deletion with confirmation.
 // Future Development: Add new parameter categories to showParametersMenu, new sub-menus for parameters.
 // - For secrets, use retrieveSecret/storeSecret from src/utils/secrets.ts, display as [description] (secret) with ******.
-// - Update subChoice choices with new parameters, maintain Back for non-editable menus, Cancel/Save and Back for editable menus.
+// - Update subChoice choices with new parameters, maintain Back/Back to menu for non-editable menus, Cancel/Save and Back for editable menus.
 // Deep Repo Analysis: Check data/parameters.json, data/secrets.json.enc, src/config/database-schema.ts, src/utils/secrets.ts, src/utils/parameters.ts, src/utils/solana/pingRpc.ts, src/utils/display/menuHandler.ts.
 
 import inquirer from 'inquirer';
@@ -52,7 +54,7 @@ export async function showParametersMenu(): Promise<void> {
           { name: '1: General Settings (timeout etc)', value: 'code' },
           { name: '2: Wallets', value: 'wallets' },
           { name: '3: RPC URLs', value: 'rpcs' },
-          { name: 'Back', value: 'back' },
+          { name: 'Back to menu', value: 'back' },
         ],
         prefix: '',
       },
@@ -125,6 +127,7 @@ export async function showParametersMenu(): Promise<void> {
             value: wallet.id,
           })),
           { name: 'Back', value: 'back' },
+          { name: 'Back to menu', value: 'back_to_menu' },
         ];
         const { subChoice } = await inquirer.prompt([
           {
@@ -137,6 +140,7 @@ export async function showParametersMenu(): Promise<void> {
         ]);
 
         if (subChoice === 'back') break;
+        if (subChoice === 'back_to_menu') return;
 
         if (subChoice === 'add') {
           const existingNames = params.defaultWalletAddresses.map(w => w.name);
@@ -287,6 +291,7 @@ export async function showParametersMenu(): Promise<void> {
             value: rpc.id,
           })),
           { name: 'Back', value: 'back' },
+          { name: 'Back to menu', value: 'back_to_menu' },
         ];
         const { subChoice } = await inquirer.prompt([
           {
@@ -299,6 +304,7 @@ export async function showParametersMenu(): Promise<void> {
         ]);
 
         if (subChoice === 'back') break;
+        if (subChoice === 'back_to_menu') return;
 
         if (subChoice === 'add') {
           const existingNames = params.defaultRpcUrls.map(r => r.name);
