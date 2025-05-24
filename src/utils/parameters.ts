@@ -3,8 +3,9 @@
 // - readParameters: Loads parameters, validates with ParametersSchema.
 // - writeParameters: Saves validated parameters.
 // - initParameters: Provides default parameter structure with UUIDs for wallets/RPCs.
+// Logging: Use console.error for errors, automatically logged to logs/terminal.log via src/utils/logging/terminal_log.ts. Do NOT use process.stdout.write to bypass logging.
 // Future Development: Add new non-secret parameters to ParametersSchema, update initParameters for new arrays (e.g., defaultRpcUrls).
-// Deep Repo Analysis: Check data/parameters.json for non-secrets, data/secrets.json.enc for secrets, src/utils/secrets.ts for encryption, src/config/database-schema.ts for schema, src/utils/display/menu.ts for menu logic.
+// Deep Repo Analysis: Check data/parameters.json for non-secrets, data/secrets.json.enc for secrets, src/utils/secrets.ts for encryption, src/config/database-schema.ts for schema, src/data-acquisition/user-parameters/menu.ts for menu logic, src/utils/logging/terminal_log.ts for logging, logs/terminal.log.
 
 import fs from 'fs/promises';
 import path from 'path';

@@ -6,10 +6,11 @@
 // - Non-editable menus: First layer (Parameters Menu) uses "Back to menu" to return to main menu. Deeper layers (Wallets, RPC URLs) use "Back" (previous layer) and "Back to menu" (main menu).
 // - Editable menus: Use "Cancel" (discard) and "Save and Back" (persist).
 // - Wallets/RPCs: Multiple entries with unique names (enforced at creation/edit), ordered by user-defined numbers (>0, sorted ascending, reindexed 1, 2, 3, ...). Edited wallet/URL gains precedence for its order, shifting others. Default wallet/URL (order 1) labeled "(default)". Deletion with confirmation.
+// Logging: Use console.log, console.error, etc., for terminal output (e.g., success messages, errors), automatically logged to logs/terminal.log via src/utils/logging/terminal_log.ts. Do NOT use process.stdout.write to bypass logging.
 // Future Development: Add new parameter categories to showParametersMenu, new sub-menus for parameters.
 // - For secrets, use retrieveSecret/storeSecret from src/utils/secrets.ts, display as [description] (secret) with ******.
 // - Update subChoice choices with new parameters, maintain Back/Back to menu for non-editable menus, Cancel/Save and Back for editable menus.
-// Deep Repo Analysis: Check data/parameters.json, data/secrets.json.enc, src/config/database-schema.ts, src/utils/secrets.ts, src/utils/parameters.ts, src/utils/solana/pingRpc.ts, src/utils/display/menuHandler.ts.
+// Deep Repo Analysis: Check data/parameters.json, data/secrets.json.enc, src/config/database-schema.ts, src/utils/secrets.ts, src/utils/parameters.ts, src/utils/solana/pingRpc.ts, src/utils/display/menuHandler.ts, src/utils/logging/terminal_log.ts, logs/terminal.log.
 
 import inquirer from 'inquirer';
 import { v4 as uuidv4 } from 'uuid';
@@ -182,7 +183,9 @@ export async function showParametersMenu(): Promise<void> {
         } else {
           const wallet = params.defaultWalletAddresses.find(w => w.id === subChoice);
           if (!wallet) continue;
-          const originalAddress = await retrieveSecret(`solanaWalletAddress_${wallet.id}`, encryptionKey);
+          // Ensure wallet is properly typed
+          const typedWallet = wallet as { id: string; name: string; order: number };
+          const originalAddress = await retrieveSecret(`solanaWalletAddress_${typedWallet.id}`, encryptionKey);
           while (true) {
             await clearScreen();
             const currentAddress = await retrieveSecret(`solanaWalletAddress_${wallet.id}`, encryptionKey);

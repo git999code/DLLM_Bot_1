@@ -1,6 +1,6 @@
 ﻿Project Root Path: C:\Users\T999\CascadeProjects\DLLM_Bot_1
 Windows Username: T999
-Generated: 05/24/2025 21:29:16
+Generated: 05/24/2025 22:07:24
 ----------------------------------------
 
   .env
@@ -32,6 +32,7 @@ Generated: 05/24/2025 21:29:16
   generate_wallet.js
   [logs]
     project_structure.log
+    terminal.log
   [node_modules]
     [.bin]
       uuid
@@ -8996,6 +8997,8 @@ Generated: 05/24/2025 21:29:16
       [display]
         menuHandler.ts
       helpers.ts
+      [logging]
+        terminal_log.ts
       parameters.ts
       parseJson.ts
       secrets.ts
